@@ -8,6 +8,8 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Eye, EyeOff, Loader2, Save, Key } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { supabase } from '@/lib/supabase';
+import { notificationService } from '@/services/notificationService';
+
 
 export const Profile = () => {
   const { user, updateProfile, userName, userInitial, isLoading } = useAuth();
@@ -50,6 +52,11 @@ export const Profile = () => {
     } finally {
       setIsSaving(false);
     }
+      if (result.success) {
+    notificationService.notifyProfileUpdate('full_name');
+    setIsEditing(false);
+    toast.success('প্রোফাইল আপডেট হয়েছে! ✅');
+  }
   };
 
   // পাসওয়ার্ড ভ্যালিডেশন
@@ -108,6 +115,9 @@ export const Profile = () => {
       if (updateError) {
         toast.error(updateError.message || 'পাসওয়ার্ড আপডেট করতে ব্যর্থ!');
         return;
+      } else {
+        notificationService.notifyProfileUpdate('password');
+        toast.success('পাসওয়ার্ড সফলভাবে আপডেট হয়েছে! 🔐');
       }
 
       toast.success('পাসওয়ার্ড সফলভাবে আপডেট হয়েছে! 🔐');
