@@ -11,7 +11,7 @@ export const Footer = () => {
         </div>
         <div className="flex items-center gap-1">
           Made with <Heart className="h-3 w-3 text-red-500 fill-red-500" /> by{' '}
-          <span className="font-medium text-foreground">TakaMinder Team</span>
+          <span className="font-medium text-foreground">Mohaiman</span>
         </div>
         <div className="flex items-center gap-4">
           <a href="#" className="hover:text-foreground transition-colors">

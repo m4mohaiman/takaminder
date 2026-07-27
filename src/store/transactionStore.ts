@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { supabase } from '../lib/supabase';
 import { Transaction } from '../types';
 import toast from 'react-hot-toast';
+import { notificationService } from '@/services/notificationService';
 
 interface TransactionState {
   transactions: Transaction[];
@@ -37,7 +38,6 @@ export const useTransactionStore = create<TransactionState>((set, get) => ({
 
   setUserId: (userId) => set({ userId }),
 
-  // ✅ আপডেটেড fetchTransactions
   fetchTransactions: async (userId, month, filter = 'currentMonth', startDate, endDate) => {
     if (!userId) {
       console.warn('No userId provided to fetchTransactions');
@@ -53,24 +53,19 @@ export const useTransactionStore = create<TransactionState>((set, get) => ({
         .eq('user_id', userId)
         .order('date', { ascending: false });
 
-      // ✅ ফিল্টার অনুযায়ী কোয়েরি তৈরি করুন
       if (filter === 'currentMonth' && month) {
         const [year, monthNum] = month.split('-').map(Number);
         const startDateStr = `${year}-${String(monthNum).padStart(2, '0')}-01`;
         const endDateStr = new Date(year, monthNum, 0).toISOString().split('T')[0];
         query = query.gte('date', startDateStr).lte('date', endDateStr);
-        
-        // selectedMonth সেট করুন
         set({ selectedMonth: month });
       } else if (filter === 'last3Months' || filter === 'last6Months' || filter === 'last12Months') {
         if (startDate && endDate) {
           query = query.gte('date', startDate).lte('date', endDate);
         }
-        // selectedMonth সেট করবেন না (রাখুন যেমন আছে)
       } else if (filter === 'custom' && startDate && endDate) {
         query = query.gte('date', startDate).lte('date', endDate);
       } else {
-        // ডিফল্ট: currentMonth
         const now = new Date();
         const defaultMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
         const [year, monthNum] = defaultMonth.split('-').map(Number);
@@ -84,9 +79,7 @@ export const useTransactionStore = create<TransactionState>((set, get) => ({
 
       if (error) throw error;
       
-      set({ 
-        transactions: data || [],
-      });
+      set({ transactions: data || [] });
       get().calculateStats();
     } catch (error) {
       console.error('Fetch error:', error);
@@ -96,6 +89,7 @@ export const useTransactionStore = create<TransactionState>((set, get) => ({
     }
   },
 
+  // ✅ addTransaction - নোটিফিকেশন সহ
   addTransaction: async (transaction) => {
     try {
       const { data, error } = await supabase
@@ -115,6 +109,9 @@ export const useTransactionStore = create<TransactionState>((set, get) => ({
         await fetchTransactions(userId, selectedMonth, 'currentMonth');
       }
       
+      // ✅ নোটিফিকেশন পাঠান
+      notificationService.notifyTransaction(data);
+      
       toast.success('ট্রানজেকশন যোগ হয়েছে! ✅');
     } catch (error) {
       console.error('Add transaction error:', error);
@@ -122,8 +119,18 @@ export const useTransactionStore = create<TransactionState>((set, get) => ({
     }
   },
 
+  // ✅ updateTransaction - নোটিফিকেশন সহ
   updateTransaction: async (id, updates) => {
     try {
+      // পুরনো ট্রানজেকশন ডেটা বের করুন (নোটিফিকেশনের জন্য)
+      const { data: oldData, error: fetchError } = await supabase
+        .from('transactions')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (fetchError) throw fetchError;
+
       const { data, error } = await supabase
         .from('transactions')
         .update(updates)
@@ -142,6 +149,9 @@ export const useTransactionStore = create<TransactionState>((set, get) => ({
         await fetchTransactions(userId, selectedMonth, 'currentMonth');
       }
       
+      // ✅ আপডেট নোটিফিকেশন
+      notificationService.notifyTransactionUpdate(oldData, data);
+      
       toast.success('ট্রানজেকশন আপডেট হয়েছে! ✏️');
     } catch (error) {
       console.error('Update transaction error:', error);
@@ -149,8 +159,18 @@ export const useTransactionStore = create<TransactionState>((set, get) => ({
     }
   },
 
+  // ✅ deleteTransaction - নোটিফিকেশন সহ
   deleteTransaction: async (id) => {
     try {
+      // ডিলিট করার আগে ডেটা বের করুন (নোটিফিকেশনের জন্য)
+      const { data: transaction, error: fetchError } = await supabase
+        .from('transactions')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (fetchError) throw fetchError;
+
       const { error } = await supabase
         .from('transactions')
         .delete()
@@ -166,6 +186,9 @@ export const useTransactionStore = create<TransactionState>((set, get) => ({
       if (userId) {
         await fetchTransactions(userId, selectedMonth, 'currentMonth');
       }
+      
+      // ✅ ডিলিট নোটিফিকেশন
+      notificationService.notifyTransactionDelete(transaction);
       
       toast.success('ট্রানজেকশন ডিলিট হয়েছে! 🗑️');
     } catch (error) {

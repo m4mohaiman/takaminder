@@ -11,12 +11,12 @@ export class NotificationService {
     return this.instance;
   }
 
-  // ট্রানজেকশন নোটিফিকেশন
+  // ✅ ট্রানজেকশন যোগ নোটিফিকেশন
   notifyTransaction(transaction: Transaction) {
     const isIncome = transaction.type === 'income';
     const amount = transaction.amount.toFixed(2);
     
-    // বড় ট্রানজেকশন চেক
+    // বড় ট্রানজেকশন চেক (১০,০০০+)
     if (transaction.amount >= 10000) {
       useNotificationStore.getState().addNotification({
         title: `বড় ${isIncome ? 'আয়' : 'খরচ'}! 💰`,
@@ -35,7 +35,42 @@ export class NotificationService {
     });
   }
 
-  // বাজেট অ্যালার্ট
+  // ✅ ট্রানজেকশন আপডেট নোটিফিকেশন
+  notifyTransactionUpdate(oldTransaction: Transaction, newTransaction: Transaction) {
+    const isIncome = newTransaction.type === 'income';
+    const amount = newTransaction.amount.toFixed(2);
+    
+    // পরিবর্তন চিহ্নিত করুন
+    let changeDetails = '';
+    if (oldTransaction.amount !== newTransaction.amount) {
+      changeDetails += ` টাকা: ${oldTransaction.amount.toFixed(2)} → ${amount}`;
+    }
+    if (oldTransaction.category !== newTransaction.category) {
+      changeDetails += ` ক্যাটাগরি: ${oldTransaction.category} → ${newTransaction.category}`;
+    }
+
+    useNotificationStore.getState().addNotification({
+      title: `ট্রানজেকশন আপডেট ✏️`,
+      message: `${isIncome ? 'আয়' : 'খরচ'} আপডেট হয়েছে${changeDetails}`,
+      type: 'info',
+      data: { transactionId: newTransaction.id },
+    });
+  }
+
+  // ✅ ট্রানজেকশন ডিলিট নোটিফিকেশন
+  notifyTransactionDelete(transaction: Transaction) {
+    const isIncome = transaction.type === 'income';
+    const amount = transaction.amount.toFixed(2);
+
+    useNotificationStore.getState().addNotification({
+      title: `ট্রানজেকশন ডিলিট 🗑️`,
+      message: `${isIncome ? 'আয়' : 'খরচ'} ডিলিট: ৳${amount} - ${transaction.category}`,
+      type: 'warning',
+      data: { transactionId: transaction.id },
+    });
+  }
+
+  // ✅ বাজেট অ্যালার্ট
   notifyBudgetAlert(category: string, spent: number, budget: number, percentage: number) {
     let type: 'warning' | 'error' = 'warning';
     let message = '';
@@ -60,7 +95,7 @@ export class NotificationService {
     }
   }
 
-  // প্রোফাইল আপডেট নোটিফিকেশন
+  // ✅ প্রোফাইল আপডেট নোটিফিকেশন
   notifyProfileUpdate(field: string) {
     const messages: Record<string, string> = {
       full_name: 'আপনার নাম আপডেট হয়েছে',
@@ -76,7 +111,7 @@ export class NotificationService {
     });
   }
 
-  // জেনেরিক নোটিফিকেশন
+  // ✅ জেনেরিক নোটিফিকেশন
   notify(title: string, message: string, type: 'success' | 'warning' | 'error' | 'info' = 'info') {
     useNotificationStore.getState().addNotification({
       title,
