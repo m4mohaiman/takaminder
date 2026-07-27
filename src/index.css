@@ -74,3 +74,72 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-ring);
 }
+
+/* ============================================
+   প্রিন্ট স্টাইল
+   ============================================ */
+@media print {
+  /* সব ব্যাকগ্রাউন্ড ও শ্যাডো সরান */
+  * {
+    background: transparent !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  /* পৃষ্ঠা সেটিংস */
+  @page {
+    margin: 15mm;
+    size: A4;
+  }
+
+  /* শরীর */
+  body {
+    background: white !important;
+    color: #1e293b !important;
+    font-size: 12px !important;
+    line-height: 1.5 !important;
+  }
+
+  /* হেডার */
+  header {
+    display: none !important;
+  }
+
+  /* সাইডবার */
+  aside {
+    display: none !important;
+  }
+
+  /* ফুটার */
+  footer {
+    display: none !important;
+  }
+
+  /* পেজ কন্টেন্ট */
+  .print\:bg-white {
+    background: white !important;
+  }
+
+  /* কার্ড */
+  .card {
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 8px !important;
+    margin-bottom: 16px !important;
+  }
+
+  /* চার্ট */
+  .apexcharts-canvas {
+    max-height: 250px !important;
+  }
+
+  /* গ্রিড */
+  .grid {
+    display: grid !important;
+    gap: 16px !important;
+  }
+
+  /* চার্ট পেজ ব্রেক */
+  .page-break {
+    page-break-after: always;
+  }
+}

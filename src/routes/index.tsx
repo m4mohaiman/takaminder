@@ -1,25 +1,26 @@
-import { PrivateRoute } from '@/components/auth/PrivateRoute';
-import { RootLayout } from '@/layout/rootLayout/RootLayout';
-import { Dashboard } from '@/pages/dashboard/Dashboard';
-import { Login } from '@/pages/login/Login';
-import { Profile } from '@/pages/profile/Profile';
-import { Register } from '@/pages/register/Register';
-import { Settings } from '@/pages/setting/Settings';
-import { Transactions } from '@/pages/transactions/Transactions';
-import { createBrowserRouter } from 'react-router-dom';
-
+import { PrivateRoute } from "@/components/auth/PrivateRoute";
+import { RootLayout } from "@/layout/rootLayout/RootLayout";
+import { Budgets } from "@/pages/budgets/Budgets";
+import { Dashboard } from "@/pages/dashboard/Dashboard";
+import { Login } from "@/pages/login/Login";
+import { Profile } from "@/pages/profile/Profile";
+import { Register } from "@/pages/register/Register";
+import { Reports } from "@/pages/reports/Reports";
+import { Settings } from "@/pages/setting/Settings";
+import { Transactions } from "@/pages/transactions/Transactions";
+import { createBrowserRouter } from "react-router-dom";
 
 export const router = createBrowserRouter([
   {
-    path: '/login',
+    path: "/login",
     element: <Login />,
   },
   {
-    path: '/register',
+    path: "/register",
     element: <Register />,
   },
   {
-    path: '/',
+    path: "/",
     element: (
       <PrivateRoute>
         <RootLayout />
@@ -31,19 +32,27 @@ export const router = createBrowserRouter([
         element: <Dashboard />,
       },
       {
-        path: 'dashboard',
+        path: "dashboard",
         element: <Dashboard />,
       },
-    {
-        path: 'transactions',
+      {
+        path: "transactions",
         element: <Transactions />,
       },
       {
-        path: 'profile',
+        path: "budgets",
+        element: <Budgets />,
+      },
+      {
+        path: "reports",
+        element: <Reports />,
+      },
+      {
+        path: "profile",
         element: <Profile />,
       },
       {
-        path: 'settings',
+        path: "settings",
         element: <Settings />,
       },
     ],

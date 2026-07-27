@@ -28,6 +28,14 @@ export interface Budget {
   year: number;
 }
 
+
+export interface BudgetWithProgress extends Budget {
+  spent: number;      
+  progress: number;     
+  remaining: number;   
+  status: 'on-track' | 'warning' | 'exceeded'; 
+}
+
 export interface User {
   id: string;
   email: string;
